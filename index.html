@@ -1,11 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Game</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-  <h1>hogehoge</h1>
+    <div class="controls">
+        <button id="addBallButton" class="btn btn-primary">弾を追加</button>
+        <label for="color">色:</label>
+        <input type="color" id="color" name="color" class="form-control d-inline-block" style="width: auto; min-width: 100px;">
+        <label for="speed">スピード:</label>
+        <input type="number" id="speed" name="speed" min="1" max="10" class="form-control d-inline-block" style="width: auto;">
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const balls = [];
+
+        document.getElementById('addBallButton').addEventListener('click', () => {
+            const colorInput = document.getElementById('color');
+            const speedInput = document.getElementById('speed');
+            const color = colorInput.value || getRandomColor();
+            const speed = parseInt(speedInput.value) || getRandomSpeed();
+            
+            // フィールドの初期値をラ���ダムに変更
+            colorInput.value = getRandomColor();
+            speedInput.value = getRandomSpeed();
+
+            balls.push(new Ball(color, speed));
+        });
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function getRandomSpeed() {
+            return Math.floor(Math.random() * 10) + 1;
+        }
+
+        class Ball {
+            constructor(color, speed) {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * speed;
+                this.vy = (Math.random() - 0.5) * speed;
+                this.color = color;
+                this.radius = 10;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.vx = -this.vx;
+                }
+
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.vy = -this.vy;
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balls.forEach(ball => {
+                ball.update();
+                ball.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
